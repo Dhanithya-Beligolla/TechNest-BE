@@ -1,8 +1,8 @@
-package com.example.technestbe.controller;
+package com.example.technestbe.controller.usermanagement;
 
-import com.example.technestbe.dto.UserResponse;
-import com.example.technestbe.dto.UpdateProfileRequest;
-import com.example.technestbe.service.UserService;
+import com.example.technestbe.dto.usermanagement.UserResponse;
+import com.example.technestbe.dto.usermanagement.UpdateProfileRequest;
+import com.example.technestbe.service.usermanagement.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,4 +1,4 @@
-package com.example.technestbe.config;
+package com.example.technestbe.config.usermanagement;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,9 +1,9 @@
-package com.example.technestbe.controller;
+package com.example.technestbe.controller.usermanagement;
 
-import com.example.technestbe.dto.*;
-import com.example.technestbe.service.AuthService;
-import com.example.technestbe.service.OtpService;
-import com.example.technestbe.service.UserService;
+import com.example.technestbe.dto.usermanagement.*;
+import com.example.technestbe.service.usermanagement.AuthService;
+import com.example.technestbe.service.usermanagement.OtpService;
+import com.example.technestbe.service.usermanagement.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

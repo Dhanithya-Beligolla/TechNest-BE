@@ -1,4 +1,4 @@
-package com.example.technestbe.model;
+package com.example.technestbe.model.user;
 
 import jakarta.persistence.*;
 import lombok.Data;

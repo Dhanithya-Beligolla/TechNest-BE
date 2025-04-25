@@ -1,11 +1,11 @@
-package com.example.technestbe.service;
+package com.example.technestbe.service.usermanagement;
 
-import com.example.technestbe.dto.LoginRequest;
-import com.example.technestbe.dto.LoginResponse;
-import com.example.technestbe.model.User;
-import com.example.technestbe.repo.UserRepository;
-import com.example.technestbe.util.ApiException;
-import com.example.technestbe.util.JwtUtil;
+import com.example.technestbe.dto.usermanagement.LoginRequest;
+import com.example.technestbe.dto.usermanagement.LoginResponse;
+import com.example.technestbe.model.user.User;
+import com.example.technestbe.repo.usermanagement.UserRepository;
+import com.example.technestbe.util.usermanagement.ApiException;
+import com.example.technestbe.util.usermanagement.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

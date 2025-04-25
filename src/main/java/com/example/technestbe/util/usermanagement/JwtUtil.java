@@ -1,4 +1,4 @@
-package com.example.technestbe.util;
+package com.example.technestbe.util.usermanagement;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
