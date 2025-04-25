@@ -3,6 +3,7 @@ package com.example.technestbe.service;
 import com.example.technestbe.dto.UserRegisterRequest;
 import com.example.technestbe.dto.AdminRegisterRequest;
 import com.example.technestbe.dto.UserResponse;
+import com.example.technestbe.dto.UpdateProfileRequest;
 import com.example.technestbe.model.User;
 import com.example.technestbe.repo.UserRepository;
 import com.example.technestbe.util.ApiException;
@@ -83,6 +84,39 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setNewPassword(null); // Clear newPassword after reset
         userRepository.save(user);
+    }
+
+    // New method to update profile
+    public UserResponse updateProfile(String email, UpdateProfileRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
+
+        // Update fields if provided in the request
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getMobile() != null) {
+            user.setMobile(request.getMobile());
+        }
+        if (request.getBirthday() != null) {
+            user.setBirthday(request.getBirthday());
+        }
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+
+        userRepository.save(user);
+        return mapToUserResponse(user);
+    }
+
+    // New method to delete profile
+    public void deleteProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
+        userRepository.delete(user);
     }
 
     private UserResponse mapToUserResponse(User user) {
