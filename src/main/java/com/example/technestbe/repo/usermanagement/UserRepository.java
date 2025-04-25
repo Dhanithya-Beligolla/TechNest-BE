@@ -1,6 +1,6 @@
-package com.example.technestbe.repo;
+package com.example.technestbe.repo.usermanagement;
 
-import com.example.technestbe.model.User;
+import com.example.technestbe.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

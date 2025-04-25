@@ -1,4 +1,4 @@
-package com.example.technestbe.service;
+package com.example.technestbe.service.usermanagement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

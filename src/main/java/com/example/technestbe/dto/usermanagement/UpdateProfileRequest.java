@@ -1,4 +1,4 @@
-package com.example.technestbe.dto;
+package com.example.technestbe.dto.usermanagement;
 
 import jakarta.validation.constraints.Past;
 import lombok.Data;

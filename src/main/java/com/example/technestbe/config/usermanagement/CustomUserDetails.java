@@ -1,6 +1,6 @@
-package com.example.technestbe.config;
+package com.example.technestbe.config.usermanagement;
 
-import com.example.technestbe.model.User;
+import com.example.technestbe.model.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

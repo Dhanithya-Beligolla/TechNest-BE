@@ -1,7 +1,7 @@
-package com.example.technestbe.config;
+package com.example.technestbe.config.usermanagement;
 
-import com.example.technestbe.model.User;
-import com.example.technestbe.repo.UserRepository;
+import com.example.technestbe.model.user.User;
+import com.example.technestbe.repo.usermanagement.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

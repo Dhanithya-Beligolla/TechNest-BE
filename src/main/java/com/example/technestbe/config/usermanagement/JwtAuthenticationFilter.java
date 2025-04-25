@@ -1,6 +1,6 @@
-package com.example.technestbe.config;
+package com.example.technestbe.config.usermanagement;
 
-import com.example.technestbe.util.JwtUtil;
+import com.example.technestbe.util.usermanagement.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

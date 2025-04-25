@@ -1,4 +1,4 @@
-package com.example.technestbe.util;
+package com.example.technestbe.util.usermanagement;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

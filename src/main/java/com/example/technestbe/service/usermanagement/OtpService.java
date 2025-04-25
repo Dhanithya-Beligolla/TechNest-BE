@@ -1,6 +1,6 @@
-package com.example.technestbe.service;
+package com.example.technestbe.service.usermanagement;
 
-import com.example.technestbe.util.ApiException;
+import com.example.technestbe.util.usermanagement.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
