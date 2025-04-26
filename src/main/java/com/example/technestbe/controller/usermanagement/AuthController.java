@@ -38,8 +38,12 @@ public class AuthController {
 
     @PostMapping("/password/reset")
     public ResponseEntity<String> requestPasswordReset(@Valid @RequestBody PasswordResetRequest request) {
-        otpService.generateAndSendOtp(request.getEmail());
-        return ResponseEntity.ok("OTP sent to email");
+        try {
+            otpService.generateAndSendOtp(request.getEmail());
+            return ResponseEntity.ok("OTP sent to email");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to send OTP: " + e.getMessage());
+        }
     }
 
     @PostMapping("/password/reset/confirm")
