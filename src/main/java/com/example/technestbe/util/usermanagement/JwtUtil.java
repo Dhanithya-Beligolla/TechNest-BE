@@ -12,10 +12,10 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:default-secret-key-for-testing-purposes-only}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400000}")
     private long expiration;
 
     public String generateToken(String email, String role) {
