@@ -11,6 +11,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:latest
+    container_name: TechNest_redis_container
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: test
+    volumes:
+      - redis_data:/data
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: techNest_pgadmin_container
