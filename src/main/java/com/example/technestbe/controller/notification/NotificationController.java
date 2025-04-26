@@ -1,5 +1,6 @@
 package com.example.technestbe.controller.notification;
 
+import com.example.technestbe.dto.notification.NotificationRequest;
 import com.example.technestbe.model.notification.Notification;
 import com.example.technestbe.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +30,15 @@ public class NotificationController {
     @GetMapping("/count/{userId}")
     public ResponseEntity<Long> getUnreadCount(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getUnreadCount(userId));
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<Notification> createLikeNotification(@RequestBody NotificationRequest request) {
+        Notification notification = notificationService.createLikeNotification(
+                request.getRecipientId(),
+                request.getSenderId(),
+                request.getPostId()
+        );
+        return ResponseEntity.ok(notification);
     }
 }
