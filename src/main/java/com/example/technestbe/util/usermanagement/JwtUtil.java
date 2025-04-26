@@ -2,6 +2,9 @@ package com.example.technestbe.util.usermanagement;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -45,8 +48,14 @@ public class JwtUtil {
         try {
             getClaimsFromToken(token);
             return true;
+        } catch (SignatureException e) {
+            throw new RuntimeException("Invalid JWT signature: " + e.getMessage());
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("JWT token is expired: " + e.getMessage());
+        } catch (MalformedJwtException e) {
+            throw new RuntimeException("Invalid JWT token format: " + e.getMessage());
         } catch (Exception e) {
-            return false;
+            throw new RuntimeException("JWT validation failed: " + e.getMessage());
         }
     }
 
