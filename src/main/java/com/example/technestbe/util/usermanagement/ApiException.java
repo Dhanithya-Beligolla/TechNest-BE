@@ -3,6 +3,7 @@ package com.example.technestbe.util.usermanagement;
 import org.springframework.http.HttpStatus;
 
 public class ApiException extends RuntimeException {
+
     private final HttpStatus status;
 
     public ApiException(String message, HttpStatus status) {

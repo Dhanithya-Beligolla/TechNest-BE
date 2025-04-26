@@ -1,9 +1,9 @@
 package com.example.technestbe.config.usermanagement;
 
 import com.example.technestbe.model.user.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -17,12 +17,14 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+        String role = user.getRole();
+        String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+        return Collections.singletonList(new SimpleGrantedAuthority(roleWithPrefix));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword() != null ? user.getPassword() : "";
+        return user.getPassword();
     }
 
     @Override
@@ -48,9 +50,5 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public String getRole() {
-        return user.getRole();
     }
 }
