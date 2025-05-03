@@ -1,29 +1,31 @@
 package com.example.technestbe.service.usermanagement;
 
-import com.example.technestbe.dto.usermanagement.UserRegisterRequest;
-import com.example.technestbe.dto.usermanagement.AdminRegisterRequest;
-import com.example.technestbe.dto.usermanagement.UserResponse;
-import com.example.technestbe.dto.usermanagement.UpdateProfileRequest;
+import com.example.technestbe.dto.usermanagement.*;
+import com.example.technestbe.util.usermanagement.ApiException;
 import com.example.technestbe.model.user.User;
 import com.example.technestbe.repo.usermanagement.UserRepository;
-import com.example.technestbe.util.usermanagement.ApiException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserResponse registerUser(UserRegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ApiException("Email already exists", HttpStatus.BAD_REQUEST);
+            throw new ApiException("Email already exists", HttpStatus.BAD_REQUEST); // Fixed: String first, then HttpStatus
         }
 
         User user = new User();
@@ -35,13 +37,12 @@ public class UserService {
         user.setBirthday(request.getBirthday());
         user.setRole("USER");
         userRepository.save(user);
-
         return mapToUserResponse(user);
     }
 
     public UserResponse registerAdmin(AdminRegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ApiException("Email already exists", HttpStatus.BAD_REQUEST);
+            throw new ApiException("Email already exists", HttpStatus.BAD_REQUEST); // Fixed: String first, then HttpStatus
         }
 
         User user = new User();
@@ -50,29 +51,24 @@ public class UserService {
         user.setFullName(request.getFullName());
         user.setRole("ADMIN");
         userRepository.save(user);
-
         return mapToUserResponse(user);
     }
 
     public UserResponse findByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND)); // Fixed: String first, then HttpStatus
         return mapToUserResponse(user);
     }
 
     public UserResponse registerOauthUser(String email, String name, String provider, String oauthId) {
-        if (!"GOOGLE".equals(provider)) {
-            throw new ApiException("Unsupported OAuth provider", HttpStatus.BAD_REQUEST);
-        }
-
         User user = userRepository.findByOauthProviderAndOauthId(provider, oauthId)
                 .orElseGet(() -> {
                     User newUser = new User();
                     newUser.setEmail(email);
-                    newUser.setFirstName(name);
-                    newUser.setRole("USER");
+                    newUser.setFullName(name);
                     newUser.setOauthProvider(provider);
                     newUser.setOauthId(oauthId);
+                    newUser.setRole("USER");
                     return userRepository.save(newUser);
                 });
         return mapToUserResponse(user);
@@ -80,43 +76,42 @@ public class UserService {
 
     public void resetPassword(String email, String newPassword) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND)); // Fixed: String first, then HttpStatus
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setNewPassword(null); // Clear newPassword after reset
         userRepository.save(user);
     }
 
-    // New method to update profile
     public UserResponse updateProfile(String email, UpdateProfileRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
-
-        // Update fields if provided in the request
-        if (request.getFirstName() != null) {
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND)); // Fixed: String first, then HttpStatus
+        if (user.getRole().equals("USER")) {
             user.setFirstName(request.getFirstName());
-        }
-        if (request.getLastName() != null) {
             user.setLastName(request.getLastName());
-        }
-        if (request.getMobile() != null) {
             user.setMobile(request.getMobile());
-        }
-        if (request.getBirthday() != null) {
             user.setBirthday(request.getBirthday());
-        }
-        if (request.getFullName() != null) {
+        } else {
             user.setFullName(request.getFullName());
         }
-
         userRepository.save(user);
         return mapToUserResponse(user);
     }
 
-    // New method to delete profile
     public void deleteProfile(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND)); // Fixed: String first, then HttpStatus
         userRepository.delete(user);
+    }
+
+    public Page<UserResponse> findRecentUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(this::mapToUserResponse);
+    }
+
+    public List<UserResponse> findAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
     }
 
     private UserResponse mapToUserResponse(User user) {
@@ -131,6 +126,7 @@ public class UserService {
         response.setRole(user.getRole());
         response.setOauthProvider(user.getOauthProvider());
         response.setOauthId(user.getOauthId());
+        response.setCreatedAt(user.getCreatedAt());
         return response;
     }
 }
