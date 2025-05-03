@@ -123,4 +123,10 @@ public class QuizService {
         List<Tutorial> tutorials = tutorialRepository.findAll();
         return quizMapper.toTutorialResponseList(tutorials);
     }
+
+    public TutorialResponse getTutorial(Long tutorialId) {
+        Tutorial tutorial = tutorialRepository.findById(tutorialId)
+                .orElseThrow(() -> new ApiException("Tutorial not found", HttpStatus.NOT_FOUND));
+        return quizMapper.toTutorialResponse(tutorial);
+    }
 }

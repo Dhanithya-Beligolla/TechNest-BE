@@ -14,12 +14,14 @@ import java.util.List;
 public interface QuizMapper {
 
     @Named("toTutorialResponseWithMcqs")
+    @Mapping(target = "mcqs", source = "mcqs")
     TutorialResponse toTutorialResponse(Tutorial tutorial);
 
     @Named("toTutorialResponseWithoutMcqs")
     @Mapping(target = "mcqs", ignore = true)
     TutorialResponse toTutorialResponseWithoutMcqs(Tutorial tutorial);
 
+    @Mapping(target = "correctAnswer", expression = "java(mcq.getOptions().get(mcq.getCorrectAnswer()))")
     MCQResponse toMCQResponse(MCQ mcq);
 
     List<TutorialResponse> toTutorialResponseList(List<Tutorial> tutorials);
