@@ -31,6 +31,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/api/auth/login",
+            "/api/auth/register/user",
+            "/api/auth/register/admin",
+            "/api/auth/password/reset",
+            "/api/auth/password/reset/confirm",
+            "/login/oauth2/code/google",
+            "/api/auth/oauth/google"
+    };
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        for (String publicEndpoint : PUBLIC_ENDPOINTS) {
+            if (path.startsWith(publicEndpoint)) {
+                logger.debug("Skipping JWT filter for public endpoint: {}", path);
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -52,7 +74,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                     logger.debug("Loaded user details: {}", userDetails.getUsername());
 
-                    // Ensure the role is prefixed with "ROLE_"
                     String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -77,7 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            logger.debug("No Bearer token found in request: {}", request.getRequestURI());
+            logger.debug("No Bearer token found in request: {}, proceeding without authentication", request.getRequestURI());
         }
         filterChain.doFilter(request, response);
     }
