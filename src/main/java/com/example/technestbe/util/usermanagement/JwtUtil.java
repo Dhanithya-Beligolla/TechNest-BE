@@ -2,9 +2,11 @@ package com.example.technestbe.util.usermanagement;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +14,12 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    @Value("${jwt.secret:default-secret-key-for-testing-purposes-only}")
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+
+    @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${jwt.expiration}")
     private long expiration;
 
     public String generateToken(String email, String role) {
@@ -29,11 +33,25 @@ public class JwtUtil {
     }
 
     public Claims getClaimsFromToken(String token) {
-        return Jwts.parser()
-                .verifyWith(key())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        try {
+            return Jwts.parser()
+                    .verifyWith(key())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            logger.error("JWT token is expired: {}", e.getMessage());
+            throw e;
+        } catch (SignatureException e) {
+            logger.error("JWT signature validation failed: {}", e.getMessage());
+            throw e;
+        } catch (MalformedJwtException e) {
+            logger.error("JWT token is malformed: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error parsing JWT token: {}", e.getMessage());
+            throw e;
+        }
     }
 
     public String getEmailFromToken(String token) {
@@ -46,16 +64,16 @@ public class JwtUtil {
 
     public boolean validateToken(String token) {
         try {
-            getClaimsFromToken(token);
+            Claims claims = getClaimsFromToken(token);
+            Date expiration = claims.getExpiration();
+            boolean isExpired = expiration.before(new Date());
+            if (isExpired) {
+                logger.warn("JWT token is expired for email: {}", claims.getSubject());
+                return false;
+            }
             return true;
-        } catch (SignatureException e) {
-            throw new RuntimeException("Invalid JWT signature: " + e.getMessage());
-        } catch (ExpiredJwtException e) {
-            throw new RuntimeException("JWT token is expired: " + e.getMessage());
-        } catch (MalformedJwtException e) {
-            throw new RuntimeException("Invalid JWT token format: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("JWT validation failed: " + e.getMessage());
+            return false;
         }
     }
 

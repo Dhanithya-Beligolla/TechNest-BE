@@ -1,18 +1,34 @@
 package com.example.technestbe.dto.usermanagement;
 
-import lombok.Data;
-import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 public class UserResponse {
+
     private Long id;
+
     private String email;
+
     private String firstName;
+
     private String lastName;
+
     private String mobile;
+
     private LocalDate birthday;
+
     private String fullName;
+
     private String role;
-    private String oauthProvider; // Added
-    private String oauthId;      // Added
+
+    private String oauthProvider;
+
+    private String oauthId;
+
+    private LocalDateTime createdAt;
 }
