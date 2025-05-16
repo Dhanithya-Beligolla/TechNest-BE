@@ -103,14 +103,31 @@ public class PostService {
         Post post = postRepository.findById(likeDTO.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
-        if (likeRepository.existsByPostIdAndUserId(post.getId(), user.getId())) {
-            throw new IllegalStateException("User already liked this post");
+        // Remove the exception to allow toggling in the frontend
+        if (!likeRepository.existsByPostIdAndUserId(post.getId(), user.getId())) {
+            Like like = new Like();
+            like.setPost(post);
+            like.setUser(user);
+            likeRepository.save(like);
         }
+    }
 
-        Like like = new Like();
-        like.setPost(post);
-        like.setUser(user);
-        likeRepository.save(like);
+    // New method to unlike a post
+    @Transactional
+    public void unlikePost(Long postId) {
+        User user = getCurrentUser();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        Like like = likeRepository.findByPostIdAndUserId(post.getId(), user.getId())
+                .orElseThrow(() -> new IllegalStateException("Like not found"));
+        likeRepository.delete(like);
+    }
+
+    // New method to check if the user has liked the post
+    public boolean hasUserLikedPost(Long postId) {
+        User user = getCurrentUser();
+        return likeRepository.existsByPostIdAndUserId(postId, user.getId());
     }
 
     @Transactional
@@ -138,7 +155,6 @@ public class PostService {
         shareRepository.save(share);
     }
 
-    // New method to fetch comments for a post
     public List<CommentDTO> getPostComments(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
@@ -162,7 +178,6 @@ public class PostService {
         return dto;
     }
 
-    // New method to map Comment to CommentDTO
     private CommentDTO mapToCommentDTO(Comment comment) {
         CommentDTO dto = new CommentDTO();
         dto.setContent(comment.getContent());

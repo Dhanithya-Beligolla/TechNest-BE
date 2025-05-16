@@ -52,6 +52,20 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    // New endpoint to unlike a post
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikePost(@PathVariable Long id) {
+        postService.unlikePost(id);
+        return ResponseEntity.ok().build();
+    }
+
+    // New endpoint to check if the user has liked the post
+    @GetMapping("/{id}/has-liked")
+    public ResponseEntity<Boolean> hasUserLikedPost(@PathVariable Long id) {
+        boolean hasLiked = postService.hasUserLikedPost(id);
+        return ResponseEntity.ok(hasLiked);
+    }
+
     @PostMapping("/{id}/comment")
     public ResponseEntity<Void> commentPost(@PathVariable Long id, @Valid @RequestBody CommentDTO commentDTO) {
         postService.commentPost(id, commentDTO);
@@ -65,7 +79,6 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    // New endpoint to fetch comments for a specific post
     @GetMapping("/{id}/comments")
     public ResponseEntity<List<CommentDTO>> getPostComments(@PathVariable Long id) {
         List<CommentDTO> comments = postService.getPostComments(id);
