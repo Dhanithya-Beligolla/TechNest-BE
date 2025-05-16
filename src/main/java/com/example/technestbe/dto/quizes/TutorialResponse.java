@@ -1,0 +1,44 @@
+package com.example.technestbe.dto.quizes;
+
+import java.util.List;
+
+public class TutorialResponse {
+
+    private Long id;
+    private String title;
+    private String description;
+    private List<MCQResponse> mcqs;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<MCQResponse> getMcqs() {
+        return mcqs;
+    }
+
+    public void setMcqs(List<MCQResponse> mcqs) {
+        this.mcqs = mcqs;
+    }
+}

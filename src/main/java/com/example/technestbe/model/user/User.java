@@ -1,14 +1,17 @@
 package com.example.technestbe.model.user;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,29 +19,30 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
-    private String firstName; // For USER
-    private String lastName;  // For USER
-    private String mobile;    // For USER
-    private LocalDate birthday; // For USER
-    private String fullName;  // For ADMIN
+    private String firstName;
+
+    private String lastName;
+
+    private String mobile;
+
+    private LocalDate birthday;
+
+    private String fullName;
 
     @Column(nullable = false)
-    private String role; // "USER" or "ADMIN"
+    private String role;
 
-    private String oauthProvider; // "GOOGLE", "FACEBOOK", or null
-    private String oauthId;      // OAuth provider ID
+    private String oauthProvider;
 
-    private String otp;          // For OTP functionality
-    private String newPassword;  // For password reset
-    private String token;        // For authentication token
+    private String oauthId;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
