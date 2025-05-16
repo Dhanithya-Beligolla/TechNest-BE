@@ -1,6 +1,6 @@
 package com.example.technestbe.service.postmanagement;
 
-import com.example.technestbe.config.usermanagement.CustomUserDetails; // Added import
+import com.example.technestbe.config.usermanagement.CustomUserDetails;
 import com.example.technestbe.dto.postmanagement.*;
 import com.example.technestbe.model.post.*;
 import com.example.technestbe.model.user.User;
@@ -8,13 +8,14 @@ import com.example.technestbe.repo.postmanagement.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication; // Added import
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -73,9 +74,7 @@ public class PostService {
         post.setDescription(postUpdateDTO.getDescription());
 
         if (postUpdateDTO.getMediaFiles() != null && postUpdateDTO.getMediaFiles().length <= 3) {
-            // Delete old media
             cloudinaryService.deleteFiles(post.getMediaUrls());
-            // Upload new media
             List<String> mediaUrls = cloudinaryService.uploadFiles(postUpdateDTO.getMediaFiles());
             post.setMediaUrls(mediaUrls);
         }
@@ -139,6 +138,14 @@ public class PostService {
         shareRepository.save(share);
     }
 
+    // New method to fetch comments for a post
+    public List<CommentDTO> getPostComments(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        List<Comment> comments = commentRepository.findByPostId(postId);
+        return comments.stream().map(this::mapToCommentDTO).collect(Collectors.toList());
+    }
+
     private PostResponseDTO mapToResponseDTO(Post post) {
         PostResponseDTO dto = new PostResponseDTO();
         dto.setId(post.getId());
@@ -152,6 +159,13 @@ public class PostService {
         dto.setLikeCount(likeRepository.countByPostId(post.getId()));
         dto.setCommentCount(commentRepository.countByPostId(post.getId()));
         dto.setShareCount(shareRepository.countByPostId(post.getId()));
+        return dto;
+    }
+
+    // New method to map Comment to CommentDTO
+    private CommentDTO mapToCommentDTO(Comment comment) {
+        CommentDTO dto = new CommentDTO();
+        dto.setContent(comment.getContent());
         return dto;
     }
 
