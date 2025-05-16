@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
@@ -61,5 +63,12 @@ public class PostController {
         shareDTO.setPostId(id);
         postService.sharePost(shareDTO);
         return ResponseEntity.ok().build();
+    }
+
+    // New endpoint to fetch comments for a specific post
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<CommentDTO>> getPostComments(@PathVariable Long id) {
+        List<CommentDTO> comments = postService.getPostComments(id);
+        return ResponseEntity.ok(comments);
     }
 }
