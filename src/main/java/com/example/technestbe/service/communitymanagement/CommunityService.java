@@ -27,6 +27,7 @@ public class CommunityService {
     @Autowired
     private CommunityCommentRepository commentRepository;
 
+    // This method is used to create a new post
     @Transactional
     public CommunityPostResponseDTO createPost(CommunityPostCreateDTO postCreateDTO) {
         User user = getCurrentUser();
@@ -39,15 +40,18 @@ public class CommunityService {
         return mapToPostResponseDTO(post);
     }
 
+    // This method is used to get all posts
     public Page<CommunityPostResponseDTO> getAllPosts(Pageable pageable) {
         return postRepository.findAll(pageable).map(this::mapToPostResponseDTO);
     }
 
+    // This method is used to get posts by user
     public Page<CommunityPostResponseDTO> getUserPosts(Pageable pageable) {
         User user = getCurrentUser();
         return postRepository.findByUserId(user.getId(), pageable).map(this::mapToPostResponseDTO);
     }
 
+    // This method is used to update a post
     @Transactional
     public CommunityPostResponseDTO updatePost(Long postId, CommunityPostUpdateDTO postUpdateDTO) {
         User user = getCurrentUser();
@@ -65,6 +69,7 @@ public class CommunityService {
         return mapToPostResponseDTO(post);
     }
 
+    // This method is used to delete a post
     @Transactional
     public void deletePost(Long postId) {
         User user = getCurrentUser();
@@ -80,6 +85,7 @@ public class CommunityService {
         postRepository.delete(post);
     }
 
+    // This method is used to add a comment to a post
     @Transactional
     public CommunityCommentResponseDTO addComment(Long postId, CommunityCommentDTO commentDTO) {
         User user = getCurrentUser();
@@ -95,6 +101,7 @@ public class CommunityService {
         return mapToCommentResponseDTO(comment);
     }
 
+    // This method is used to update a comment
     @Transactional
     public CommunityCommentResponseDTO updateComment(Long commentId, CommunityCommentDTO commentDTO) {
         User user = getCurrentUser();
@@ -110,6 +117,7 @@ public class CommunityService {
         return mapToCommentResponseDTO(comment);
     }
 
+    // This method is used to delete a comment
     @Transactional
     public void deleteComment(Long commentId) {
         User user = getCurrentUser();
@@ -123,12 +131,15 @@ public class CommunityService {
         commentRepository.delete(comment);
     }
 
+    // This method is used to get comments by post ID
     public List<CommunityCommentResponseDTO> getCommentsByPostId(Long postId) {
         return commentRepository.findByPostId(postId).stream()
                 .map(this::mapToCommentResponseDTO)
                 .collect(Collectors.toList());
     }
 
+
+    // Helper methods to map entities to DTOs
     private CommunityPostResponseDTO mapToPostResponseDTO(CommunityPost post) {
         CommunityPostResponseDTO dto = new CommunityPostResponseDTO();
         dto.setId(post.getId());
@@ -142,6 +153,7 @@ public class CommunityService {
         return dto;
     }
 
+    // Helper method to map comment entity to DTO
     private CommunityCommentResponseDTO mapToCommentResponseDTO(CommunityComment comment) {
         CommunityCommentResponseDTO dto = new CommunityCommentResponseDTO();
         dto.setId(comment.getId());
@@ -154,6 +166,7 @@ public class CommunityService {
         return dto;
     }
 
+    // Helper method to get the current authenticated user
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
