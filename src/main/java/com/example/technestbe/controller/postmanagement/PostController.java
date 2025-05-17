@@ -17,34 +17,40 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    //create that end point to create a post
     @PostMapping
     public ResponseEntity<PostResponseDTO> createPost(@Valid @ModelAttribute PostCreateDTO postCreateDTO) throws Exception {
-        PostResponseDTO post = postService.createPost(postCreateDTO);
+        PostResponseDTO post = postService.createPost(postCreateDTO);  // call the createPost function in the postService service
         return ResponseEntity.ok(post);
     }
 
+    //create that end point to get all of the post
     @GetMapping
     public ResponseEntity<Page<PostResponseDTO>> getAllPosts(Pageable pageable) {
         return ResponseEntity.ok(postService.getAllPosts(pageable));
     }
 
+    //create that end point to get the logged user's posts
     @GetMapping("/user")
     public ResponseEntity<Page<PostResponseDTO>> getUserPosts(Pageable pageable) {
         return ResponseEntity.ok(postService.getUserPosts(pageable));
     }
 
+    //create that end point to update the post
     @PutMapping("/{id}")
     public ResponseEntity<PostResponseDTO> updatePost(@PathVariable Long id, @Valid @ModelAttribute PostUpdateDTO postUpdateDTO) throws Exception {
         PostResponseDTO post = postService.updatePost(id, postUpdateDTO);
         return ResponseEntity.ok(post);
     }
 
+    //create that end point to delete a post
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) throws Exception {
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
     }
 
+    //create that end point to like a post
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> likePost(@PathVariable Long id, @Valid @RequestBody LikeDTO likeDTO) {
         likeDTO.setPostId(id);

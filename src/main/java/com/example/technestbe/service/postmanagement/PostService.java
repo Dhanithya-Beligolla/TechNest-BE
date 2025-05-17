@@ -34,6 +34,7 @@ public class PostService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    //this is a createPost methode
     @Transactional
     public PostResponseDTO createPost(PostCreateDTO postCreateDTO) throws IOException {
         User user = getCurrentUser();
@@ -51,6 +52,7 @@ public class PostService {
         return mapToResponseDTO(post);
     }
 
+    //this methode is use to get the all of the post
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         return postRepository.findAll(pageable).map(this::mapToResponseDTO);
     }
