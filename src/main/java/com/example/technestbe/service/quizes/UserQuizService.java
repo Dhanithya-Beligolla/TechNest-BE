@@ -17,8 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Optional; // Added import for Optional
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +31,8 @@ public class UserQuizService {
     private final UserAnswerRepository userAnswerRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public UserQuizService(TutorialRepository tutorialRepository, MCQRepository mcqRepository,
                            UserAnswerRepository userAnswerRepository, EnrollmentRepository enrollmentRepository,
@@ -49,8 +53,17 @@ public class UserQuizService {
 
     @Transactional
     public void enrollUser(Long userId, Long tutorialId) {
+        // Fetch the tutorial and verify its existence with a fresh query
         Tutorial tutorial = tutorialRepository.findById(tutorialId)
-                .orElseThrow(() -> new ApiException("Tutorial not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApiException("Tutorial not found with ID: " + tutorialId, HttpStatus.NOT_FOUND));
+
+        // Use a native query to validate the tutorial exists in the database
+        Long count = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM tutorial WHERE id = ?")
+                .setParameter(1, tutorialId)
+                .getSingleResult();
+        if (count == 0) {
+            throw new ApiException("Tutorial no longer exists with ID: " + tutorialId, HttpStatus.NOT_FOUND);
+        }
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
@@ -63,7 +76,22 @@ public class UserQuizService {
         Enrollment enrollment = new Enrollment();
         enrollment.setUser(userRepository.getReferenceById(userId));
         enrollment.setTutorial(tutorial);
-        enrollmentRepository.save(enrollment);
+        try {
+            enrollmentRepository.save(enrollment);
+        } catch (Exception e) {
+            throw new ApiException("Failed to enroll user due to database error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public void unenrollUser(Long userId, Long tutorialId) {
+        Enrollment enrollment = enrollmentRepository.findByUserIdAndTutorialId(userId, tutorialId)
+                .orElseThrow(() -> new ApiException("User is not enrolled in this tutorial", HttpStatus.NOT_FOUND));
+
+        // Optionally delete associated user answers (if desired)
+        userAnswerRepository.deleteByUserIdAndTutorialId(userId, tutorialId);
+
+        enrollmentRepository.delete(enrollment);
     }
 
     @Transactional
@@ -122,5 +150,31 @@ public class UserQuizService {
         return enrollments.stream()
                 .map(enrollment -> getProgress(userId, enrollment.getTutorial().getId()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Long getNextQuestionId(Long userId, Long tutorialId) {
+        Tutorial tutorial = tutorialRepository.findById(tutorialId)
+                .orElseThrow(() -> new ApiException("Tutorial not found", HttpStatus.NOT_FOUND));
+
+        Optional<Enrollment> enrollment = enrollmentRepository.findByUserIdAndTutorialId(userId, tutorialId);
+        if (enrollment.isEmpty()) {
+            throw new ApiException("User is not enrolled in this tutorial", HttpStatus.BAD_REQUEST);
+        }
+
+        List<UserAnswer> userAnswers = userAnswerRepository.findByUserIdAndTutorialId(userId, tutorialId);
+        List<Long> answeredMcqIds = userAnswers.stream()
+                .map(userAnswer -> userAnswer.getMcq().getId())
+                .collect(Collectors.toList());
+
+        // Find the first MCQ that hasn't been answered
+        for (MCQ mcq : tutorial.getMcqs()) {
+            if (!answeredMcqIds.contains(mcq.getId())) {
+                return mcq.getId();
+            }
+        }
+
+        // If all questions are answered, return -1 to indicate completion
+        return -1L;
     }
 }

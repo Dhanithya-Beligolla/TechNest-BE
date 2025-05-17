@@ -4,14 +4,19 @@ import com.example.technestbe.dto.quizes.MCQRequest;
 import com.example.technestbe.dto.quizes.MCQResponse;
 import com.example.technestbe.dto.quizes.TutorialRequest;
 import com.example.technestbe.dto.quizes.TutorialResponse;
+import com.example.technestbe.dto.quizes.TutorialWithEnrollmentCountResponse;
 import com.example.technestbe.mapper.QuizMapper;
+import com.example.technestbe.model.quizes.Enrollment;
+import com.example.technestbe.repo.quizes.EnrollmentRepository;
 import com.example.technestbe.service.quizes.QuizService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/quizzes")
@@ -20,10 +25,12 @@ public class AdminQuizController {
 
     private final QuizService quizService;
     private final QuizMapper quizMapper;
+    private final EnrollmentRepository enrollmentRepository;
 
-    public AdminQuizController(QuizService quizService, QuizMapper quizMapper) {
+    public AdminQuizController(QuizService quizService, QuizMapper quizMapper, EnrollmentRepository enrollmentRepository) {
         this.quizService = quizService;
         this.quizMapper = quizMapper;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @PostMapping("/tutorials")
@@ -72,5 +79,92 @@ public class AdminQuizController {
     @GetMapping("/tutorials/{tutorialId}")
     public ResponseEntity<TutorialResponse> getTutorial(@PathVariable Long tutorialId) {
         return ResponseEntity.ok(quizService.getTutorial(tutorialId));
+    }
+
+    @GetMapping("/enrollment-activity")
+    public ResponseEntity<List<EnrollmentActivityResponse>> getEnrollmentActivity() {
+        List<Enrollment> enrollments = enrollmentRepository.findAll();
+        List<EnrollmentActivityResponse> activityResponses = enrollments.stream()
+                .map(enrollment -> new EnrollmentActivityResponse(
+                        enrollment.getUser().getEmail(),
+                        enrollment.getTutorial().getTitle(),
+                        enrollment.getTutorial().getId(),
+                        enrollment.getUser().getId(),
+                        enrollment.getCreatedAt()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(activityResponses);
+    }
+
+    @GetMapping("/tutorials-with-enrollment-count")
+    public ResponseEntity<List<TutorialWithEnrollmentCountResponse>> getTutorialsWithEnrollmentCount() {
+        List<TutorialResponse> tutorials = quizService.getAllTutorials();
+        List<TutorialWithEnrollmentCountResponse> response = tutorials.stream()
+                .map(tutorial -> {
+                    long enrollmentCount = enrollmentRepository.countByTutorialId(tutorial.getId());
+                    return new TutorialWithEnrollmentCountResponse(
+                            tutorial.getId(),
+                            tutorial.getTitle(),
+                            tutorial.getDescription(),
+                            enrollmentCount);
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    // Inner class for Enrollment Activity Response
+    public static class EnrollmentActivityResponse {
+        private String userEmail;
+        private String tutorialTitle;
+        private Long tutorialId;
+        private Long userId;
+        private LocalDateTime createdAt;
+
+        public EnrollmentActivityResponse(String userEmail, String tutorialTitle, Long tutorialId, Long userId, LocalDateTime createdAt) {
+            this.userEmail = userEmail;
+            this.tutorialTitle = tutorialTitle;
+            this.tutorialId = tutorialId;
+            this.userId = userId;
+            this.createdAt = createdAt;
+        }
+
+        public String getUserEmail() {
+            return userEmail;
+        }
+
+        public void setUserEmail(String userEmail) {
+            this.userEmail = userEmail;
+        }
+
+        public String getTutorialTitle() {
+            return tutorialTitle;
+        }
+
+        public void setTutorialTitle(String tutorialTitle) {
+            this.tutorialTitle = tutorialTitle;
+        }
+
+        public Long getTutorialId() {
+            return tutorialId;
+        }
+
+        public void setTutorialId(Long tutorialId) {
+            this.tutorialId = tutorialId;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
     }
 }

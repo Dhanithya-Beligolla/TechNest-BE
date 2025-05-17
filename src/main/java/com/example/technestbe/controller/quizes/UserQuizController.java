@@ -43,12 +43,28 @@ public class UserQuizController {
         return ResponseEntity.ok(quizService.getAllTutorials());
     }
 
+    // Get a specific tutorial with MCQs (for taking the quiz)
+    @GetMapping("/tutorials/{tutorialId}")
+    public ResponseEntity<TutorialResponse> getTutorial(@PathVariable Long tutorialId) {
+        Long userId = getAuthenticatedUserId();
+        userQuizService.getProgress(userId, tutorialId); // Will throw exception if not enrolled
+        return ResponseEntity.ok(quizService.getTutorial(tutorialId));
+    }
+
     // Enroll in a tutorial
     @PostMapping("/tutorials/{tutorialId}/enroll")
     public ResponseEntity<String> enroll(@PathVariable Long tutorialId) {
         Long userId = getAuthenticatedUserId();
         userQuizService.enrollUser(userId, tutorialId);
         return ResponseEntity.ok("Enrolled successfully");
+    }
+
+    // Unenroll from a tutorial
+    @DeleteMapping("/tutorials/{tutorialId}/unenroll")
+    public ResponseEntity<String> unenroll(@PathVariable Long tutorialId) {
+        Long userId = getAuthenticatedUserId();
+        userQuizService.unenrollUser(userId, tutorialId);
+        return ResponseEntity.ok("Unenrolled successfully");
     }
 
     // Submit an answer to an MCQ
@@ -64,5 +80,13 @@ public class UserQuizController {
     public ResponseEntity<List<UserProgressResponse>> getDashboard() {
         Long userId = getAuthenticatedUserId();
         return ResponseEntity.ok(userQuizService.getUserDashboard(userId));
+    }
+
+    // Get the next unanswered question for a tutorial
+    @GetMapping("/tutorials/{tutorialId}/next-question")
+    public ResponseEntity<Long> getNextQuestion(@PathVariable Long tutorialId) {
+        Long userId = getAuthenticatedUserId();
+        Long nextQuestionId = userQuizService.getNextQuestionId(userId, tutorialId);
+        return ResponseEntity.ok(nextQuestionId);
     }
 }

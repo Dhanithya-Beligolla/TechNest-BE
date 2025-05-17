@@ -13,7 +13,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface QuizMapper {
 
-    @Named("toTutorialResponseWithMcqs")
     @Mapping(target = "mcqs", source = "mcqs")
     TutorialResponse toTutorialResponse(Tutorial tutorial);
 

@@ -5,13 +5,16 @@ import com.example.technestbe.dto.quizes.MCQResponse;
 import com.example.technestbe.dto.quizes.TutorialRequest;
 import com.example.technestbe.dto.quizes.TutorialResponse;
 import com.example.technestbe.mapper.QuizMapper;
+import com.example.technestbe.model.quizes.Enrollment;
 import com.example.technestbe.model.quizes.MCQ;
 import com.example.technestbe.model.quizes.Tutorial;
 import com.example.technestbe.repo.quizes.MCQRepository;
 import com.example.technestbe.repo.quizes.TutorialRepository;
+import com.example.technestbe.repo.quizes.EnrollmentRepository;
 import com.example.technestbe.util.usermanagement.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,11 +23,14 @@ public class QuizService {
 
     private final TutorialRepository tutorialRepository;
     private final MCQRepository mcqRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final QuizMapper quizMapper;
 
-    public QuizService(TutorialRepository tutorialRepository, MCQRepository mcqRepository, QuizMapper quizMapper) {
+    public QuizService(TutorialRepository tutorialRepository, MCQRepository mcqRepository,
+                       EnrollmentRepository enrollmentRepository, QuizMapper quizMapper) {
         this.tutorialRepository = tutorialRepository;
         this.mcqRepository = mcqRepository;
+        this.enrollmentRepository = enrollmentRepository;
         this.quizMapper = quizMapper;
     }
 
@@ -49,9 +55,14 @@ public class QuizService {
         return quizMapper.toTutorialResponse(updatedTutorial);
     }
 
+    @Transactional
     public void deleteTutorial(Long tutorialId) {
         Tutorial tutorial = tutorialRepository.findById(tutorialId)
                 .orElseThrow(() -> new ApiException("Tutorial not found", HttpStatus.NOT_FOUND));
+        List<Enrollment> enrollments = enrollmentRepository.findByTutorialId(tutorialId);
+        if (!enrollments.isEmpty()) {
+            throw new ApiException("Cannot delete tutorial with active enrollments", HttpStatus.BAD_REQUEST);
+        }
         tutorialRepository.delete(tutorial);
     }
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "tutorials") // Explicitly set the table name to match the foreign key constraint
 public class Tutorial {
 
     @Id
